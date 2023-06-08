@@ -1,0 +1,19 @@
+{
+  "name": "roll-initiative-app",
+  "version": "1.0.0",
+  "description": "Gather your party, prepare your monsters and... roll for initiative!",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Moldeador/roll-initiative-app.git"
+  },
+  "author": "santiago cabrera",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/Moldeador/roll-initiative-app/issues"
+  },
+  "homepage": "https://github.com/Moldeador/roll-initiative-app#readme"
+}
