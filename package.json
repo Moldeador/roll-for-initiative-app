@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Moldeador/roll-initiative-app/issues"
   },
-  "homepage": "https://github.com/Moldeador/roll-initiative-app#readme"
+  "homepage": "https://github.com/Moldeador/roll-initiative-app#readme",
+  "devDependencies": {
+    "jest": "^29.5.0"
+  }
 }
