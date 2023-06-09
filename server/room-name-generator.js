@@ -30,6 +30,17 @@ const words = [
 	"devil"
 ];
 
-for (let index in words) {
-	console.log(words[index]);
-};
+function getRandomValueFromList(list){
+	let randomValue = list[Math.floor(Math.random()*list.length)];
+	return randomValue;
+}
+
+function generateName(){
+	let name = getRandomValueFromList(words);
+	for (let i = 0; i < 2; i++){
+		name = name + "-" + getRandomValueFromList(words);
+	};
+	return name;
+}
+
+module.exports = generateName;
