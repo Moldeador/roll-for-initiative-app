@@ -43,4 +43,4 @@ function generateName(){
 	return name;
 }
 
-module.exports = generateName;
+module.exports.generateName = generateName;
