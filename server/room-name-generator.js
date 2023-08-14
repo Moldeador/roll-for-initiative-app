@@ -14,7 +14,6 @@ const words = [
 	"shield",
 	"hoard",
 	"treasure",
-	"pole",
 	"manticore",
 	"orc",
 	"god",

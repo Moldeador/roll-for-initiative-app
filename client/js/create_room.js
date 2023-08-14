@@ -1,6 +1,5 @@
-async function createNewRoom(idToStoreNameOfNewRoom){
-	let response = await fetch("http://localhost:3000/createRoom");
+async function createNewRoom(){
+	let response = await fetch("http://localhost:3000/rooms", {method: "POST"});
 	let data = await response.text();
-	console.log(response);
-	document.getElementById(idToStoreNameOfNewRoom).innerHTML = data;
+	location.href = `./room.html?name=${data}`;
 }

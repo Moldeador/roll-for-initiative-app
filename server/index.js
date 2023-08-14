@@ -10,30 +10,50 @@ let rooms = [];
 
 const server = http.createServer(function (req, res) {
 	var parsedUrl = url.parse(req.url, true);
-	if (parsedUrl.pathname === '/createRoom'){
-		res.writeHead(200, {
-			'Content-Type': 'text/plain',
-			'Access-Control-Allow-Origin': 'http://localhost:8000'
-		});
+	if (req.method === "GET"){
+		if (parsedUrl.pathname === '/rooms'){
 		
+			res.writeHead(200, {
+				'Content-Type': 'text/plain',
+				'Access-Control-Allow-Origin': 'http://localhost:8000'
+			});
+			res.write(JSON.stringify(rooms));
+			res.end();
 
-		let name = nameGenerator.generateName();
-		while (rooms.includes(name)){
-			let name = nameGenerator.generateName();
+		} else if (parsedUrl.pathname.startsWith('/rooms/')){
+			res.writeHead(200, {
+				'Content-Type': 'text/plain',
+				'Access-Control-Allow-Origin': 'http://localhost:8000'
+			});
+			const pathParts = parsedUrl.pathname.split("/");
+			const nameOfRoom = pathParts[1];
+			if ( ! rooms.includes(nameOfRoom) ){
+				res.end(`{"error": "${http.STATUS_CODES[404]}"}`);
+			} else {
+				res.write(nameOfRoom);
+				res.end();
+			}
+		
 		}
-		rooms.push(name)
-		res.write(name);
-		res.end();
-	}
-	if (parsedUrl.pathname === '/list_of_rooms'){
-	
-		res.writeHead(200, {
-			'Content-Type': 'text/plain',
-			'Access-Control-Allow-Origin': 'http://localhost:8000'
-		});
-		res.write(JSON.stringify(rooms));
-		res.end();
+	} else if (req.method === "POST") {
+		if (parsedUrl.pathname === '/rooms'){
+			res.writeHead(201, {
+				'Content-Type': 'text/plain',
+				'Access-Control-Allow-Origin': 'http://localhost:8000'
+			});
+			
 
+			let name = nameGenerator.generateName();
+			while (rooms.includes(name)){
+				let name = nameGenerator.generateName();
+			}
+			rooms.push(name)
+			res.write(name);
+			res.end();
+		}
+
+	} else {
+		res.end(`{"error": "${http.STATUS_CODES[405]}"}`)	
 	}
 });
 
