@@ -45,7 +45,7 @@ const server = http.createServer(function (req, res) {
 
 			let name = nameGenerator.generateName();
 			while (rooms.includes(name)){
-				let name = nameGenerator.generateName();
+				name = nameGenerator.generateName();
 			}
 			rooms.push(name)
 			res.write(name);
