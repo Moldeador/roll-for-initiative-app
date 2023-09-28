@@ -15,7 +15,7 @@ const server = http.createServer(function (req, res) {
 		
 			res.writeHead(200, {
 				'Content-Type': 'text/plain',
-				'Access-Control-Allow-Origin': 'http://localhost:8000'
+				'Access-Control-Allow-Origin': '*'
 			});
 			res.write(JSON.stringify(rooms));
 			res.end();
@@ -23,7 +23,7 @@ const server = http.createServer(function (req, res) {
 		} else if (parsedUrl.pathname.startsWith('/rooms/')){
 			res.writeHead(200, {
 				'Content-Type': 'text/plain',
-				'Access-Control-Allow-Origin': 'http://localhost:8000'
+				'Access-Control-Allow-Origin': '*'
 			});
 			const pathParts = parsedUrl.pathname.split("/");
 			const nameOfRoom = pathParts[1];
@@ -39,7 +39,7 @@ const server = http.createServer(function (req, res) {
 		if (parsedUrl.pathname === '/rooms'){
 			res.writeHead(201, {
 				'Content-Type': 'text/plain',
-				'Access-Control-Allow-Origin': 'http://localhost:8000'
+				'Access-Control-Allow-Origin': '*'
 			});
 			
 
