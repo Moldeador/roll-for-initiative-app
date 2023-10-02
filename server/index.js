@@ -1,8 +1,10 @@
 const http = require('http');
 const url = require('url');
-const mysql = require('mysql2');
 const nameGenerator = require('./room-name-generator.js');
+//Websockets
+const ws =require('ws');
 
+const wss = new ws.WebSocketServer({ noServer: true });
 
 
 let rooms = [];
@@ -61,6 +63,27 @@ server.on('connection', function (socket) {
 	console.log('New connection');
 });
 
+server.on('upgrade', function(request, socket, head){
+	wss.handleUpgrade(request, socket, head, function(ws){
+		wss.emit('connection', ws, "santi");
+	});
+});
+
+
 server.listen(3000);
 
 console.log('Listening on port 3000...');
+
+
+
+
+
+wss.on("connection", function connection(ws, roomName) {
+	ws.on("message", function message(data) {
+		console.log("received: %s", data);
+	});
+	ws.send("youve joined room " + roomName);
+	setInterval(async ()=>{
+		ws.send("hello");
+	}, 1000);
+});

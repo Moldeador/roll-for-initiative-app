@@ -18,5 +18,8 @@
   "homepage": "https://github.com/Moldeador/roll-initiative-app#readme",
   "devDependencies": {
     "jest": "^29.5.0"
+  },
+  "dependencies": {
+    "ws": "^8.14.2"
   }
 }
