@@ -28,7 +28,7 @@ const server = http.createServer(function (req, res) {
 				'Access-Control-Allow-Origin': '*'
 			});
 			const pathParts = parsedUrl.pathname.split("/");
-			const nameOfRoom = pathParts[1];
+			const nameOfRoom = pathParts[2];
 			if ( ! rooms.includes(nameOfRoom) ){
 				res.end(`{"error": "${http.STATUS_CODES[404]}"}`);
 			} else {
@@ -64,12 +64,18 @@ server.on('connection', function (socket) {
 });
 
 server.on('upgrade', function(request, socket, head){
-	wss.handleUpgrade(request, socket, head, function(ws){
-		const parsedUrl = url.parse(request.url, true);
-		const pathParts = parsedUrl.pathname.split("/");
-		const nameOfRoom = pathParts[2];
-		wss.emit('connection', ws, nameOfRoom);
-	});
+	const { pathname } = url.parse(request.url);
+	const pathParts = pathname.split("/");
+	const mainPage = pathParts[1];
+	const sludge = pathParts[2];
+
+	if (mainPage === 'room') {
+		wss.handleUpgrade(request, socket, head, function (ws) {
+			wss.emit('connection', ws, sludge);
+		});
+	} else {
+		socket.destroy();
+	}
 });
 
 
