@@ -7,7 +7,7 @@ const ws =require('ws');
 const wss = new ws.WebSocketServer({ noServer: true });
 
 
-let rooms = [];
+let rooms = {};
 
 
 const server = http.createServer(function (req, res) {
@@ -19,7 +19,7 @@ const server = http.createServer(function (req, res) {
 				'Content-Type': 'text/plain',
 				'Access-Control-Allow-Origin': '*'
 			});
-			res.write(JSON.stringify(rooms));
+			res.write(JSON.stringify(Object.keys(rooms)));
 			res.end();
 
 		} else if (parsedUrl.pathname.startsWith('/rooms/')){
@@ -29,7 +29,7 @@ const server = http.createServer(function (req, res) {
 			});
 			const pathParts = parsedUrl.pathname.split("/");
 			const nameOfRoom = pathParts[2];
-			if ( ! rooms.includes(nameOfRoom) ){
+			if ( ! (nameOfRoom in rooms) ){
 				res.end(`{"error": "${http.STATUS_CODES[404]}"}`);
 			} else {
 				res.write(nameOfRoom);
@@ -46,10 +46,10 @@ const server = http.createServer(function (req, res) {
 			
 
 			let name = nameGenerator.generateName();
-			while (rooms.includes(name)){
+			while (name in rooms){
 				name = nameGenerator.generateName();
 			}
-			rooms.push(name)
+			rooms[name] = {name, webSockets:[]};
 			res.write(name);
 			res.end();
 		}
@@ -67,12 +67,19 @@ server.on('upgrade', function(request, socket, head){
 	const { pathname } = url.parse(request.url);
 	const pathParts = pathname.split("/");
 	const mainPage = pathParts[1];
-	const sludge = pathParts[2];
+	const slug = pathParts[2];
 
-	if (mainPage === 'room') {
-		wss.handleUpgrade(request, socket, head, function (ws) {
-			wss.emit('connection', ws, sludge);
-		});
+	if (mainPage === 'rooms') {
+		roomName = slug;
+		if(roomName in rooms){
+			wss.handleUpgrade(request, socket, head, function (ws) {
+				rooms[roomName].webSockets.push(ws);
+				console.log(rooms);
+				wss.emit('connection', ws, slug);
+			});
+		} else {
+			socket.destroy();
+		}
 	} else {
 		socket.destroy();
 	}
@@ -88,11 +95,15 @@ console.log('Listening on port 3000...');
 
 
 wss.on("connection", function connection(ws, roomName) {
-	ws.on("message", function message(data) {
-		console.log("received: %s", data);
-	});
-	ws.send("youve joined room " + roomName);
-	/*setInterval(async ()=>{
-		ws.send("hello");
-	}, 1000);*/
+	for (webSocket of rooms[roomName].webSockets){
+		webSocket.send("a new player has joined room: " + roomName);
+	}
+	ws.on("close", function(){
+		const index = rooms[roomName].webSockets.indexOf(ws);
+		rooms[roomName].webSockets.splice(index, 1);
+		for (webSocket of rooms[roomName].webSockets){
+			webSocket.send("a player has left the room: " + roomName);
+		}
+
+	})
 });
