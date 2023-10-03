@@ -65,7 +65,10 @@ server.on('connection', function (socket) {
 
 server.on('upgrade', function(request, socket, head){
 	wss.handleUpgrade(request, socket, head, function(ws){
-		wss.emit('connection', ws, "santi");
+		const parsedUrl = url.parse(request.url, true);
+		const pathParts = parsedUrl.pathname.split("/");
+		const nameOfRoom = pathParts[2];
+		wss.emit('connection', ws, nameOfRoom);
 	});
 });
 
@@ -83,7 +86,7 @@ wss.on("connection", function connection(ws, roomName) {
 		console.log("received: %s", data);
 	});
 	ws.send("youve joined room " + roomName);
-	setInterval(async ()=>{
+	/*setInterval(async ()=>{
 		ws.send("hello");
-	}, 1000);
+	}, 1000);*/
 });
