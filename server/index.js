@@ -95,15 +95,20 @@ console.log('Listening on port 3000...');
 
 
 wss.on("connection", function connection(ws, roomName) {
-	for (webSocket of rooms[roomName].webSockets){
-		webSocket.send("a new player has joined room: " + roomName);
-	}
+	sendMessageToRoom("a new player has joined room: " + roomName, roomName);
 	ws.on("close", function(){
-		const index = rooms[roomName].webSockets.indexOf(ws);
-		rooms[roomName].webSockets.splice(index, 1);
-		for (webSocket of rooms[roomName].webSockets){
-			webSocket.send("a player has left the room: " + roomName);
-		}
-
+		deleteSocketFromRoom(ws, roomName);
+		sendMessageToRoom("a player has left the room: " + roomName, roomName);
 	})
 });
+
+function sendMessageToRoom(message, room){
+	for (webSocket of rooms[room].webSockets){
+		webSocket.send(message);
+	}
+}
+
+function deleteSocketFromRoom(socket, room){
+	const index = rooms[room].webSockets.indexOf(socket);
+	rooms[room].webSockets.splice(index, 1);
+}
