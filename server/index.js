@@ -96,6 +96,9 @@ console.log('Listening on port 3000...');
 
 wss.on("connection", function connection(ws, roomName) {
 	sendMessageToRoom("a new player has joined room: " + roomName, roomName);
+	ws.on("message", function(msg) {
+		ws.send(msg.toString());
+	})
 	ws.on("close", function(){
 		deleteSocketFromRoom(ws, roomName);
 		sendMessageToRoom("a player has left the room: " + roomName, roomName);
