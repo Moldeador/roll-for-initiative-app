@@ -96,10 +96,9 @@ console.log('Listening on port 3000...');
 wss.on("connection", function connection(ws, roomName) {
 	sendMessageToRoom("a new player has joined room: " + roomName, roomName);
 	ws.on("message", function(msg) {
-		ws.send(msg.toString());
-		const data = JSON.parse(msg.toString());
-		if ("userData" in data){
-			const userData = data.userData;
+		const receivedMessage = JSON.parse(msg.toString());
+		if (receivedMessage.event === "userData"){
+			const userData = receivedMessage.data;
 			const uid = userData.uid;
 			const characterName = userData.characterName;
 			const initiativeModifier = userData.initiativeModifier;
@@ -109,6 +108,8 @@ wss.on("connection", function connection(ws, roomName) {
 			console.log(rooms);
 			console.log(rooms[roomName].users[uid]);
 			console.log(rooms[roomName].webSockets);
+
+			sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: getListOfUsers(roomName)}), roomName);
 		}
 		
 	})
@@ -142,4 +143,12 @@ function deleteInactiveUsers(room){
 	for (const uid of usersToDelete){
 		delete rooms[room].users[uid];
 	}
+}
+
+function getListOfUsers(room){
+	const dataToSendToClient = [];
+	for (const [uid, userData] of Object.entries(rooms[room].users)){
+		dataToSendToClient.push(userData);
+	}
+	return dataToSendToClient;
 }
