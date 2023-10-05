@@ -9,7 +9,6 @@ const wss = new ws.WebSocketServer({ noServer: true });
 
 let rooms = {};
 
-
 const server = http.createServer(function (req, res) {
 	var parsedUrl = url.parse(req.url, true);
 	if (req.method === "GET"){
@@ -49,7 +48,7 @@ const server = http.createServer(function (req, res) {
 			while (name in rooms){
 				name = nameGenerator.generateName();
 			}
-			rooms[name] = {name, webSockets:[]};
+			rooms[name] = {name, webSockets:[], users: {}};
 			res.write(name);
 			res.end();
 		}
@@ -98,15 +97,30 @@ wss.on("connection", function connection(ws, roomName) {
 	sendMessageToRoom("a new player has joined room: " + roomName, roomName);
 	ws.on("message", function(msg) {
 		ws.send(msg.toString());
+		const data = JSON.parse(msg.toString());
+		if ("userData" in data){
+			const userData = data.userData;
+			const uid = userData.uid;
+			const characterName = userData.characterName;
+			const initiativeModifier = userData.initiativeModifier;
+			rooms[roomName].users[uid] = {characterName, initiativeModifier}
+			ws.userUid = uid;
+			deleteInactiveUsers(roomName);
+			console.log(rooms);
+			console.log(rooms[roomName].users[uid]);
+			console.log(rooms[roomName].webSockets);
+		}
+		
 	})
 	ws.on("close", function(){
 		deleteSocketFromRoom(ws, roomName);
+		deleteInactiveUsers(roomName);
 		sendMessageToRoom("a player has left the room: " + roomName, roomName);
 	})
 });
 
 function sendMessageToRoom(message, room){
-	for (webSocket of rooms[room].webSockets){
+	for (const webSocket of rooms[room].webSockets){
 		webSocket.send(message);
 	}
 }
@@ -114,4 +128,18 @@ function sendMessageToRoom(message, room){
 function deleteSocketFromRoom(socket, room){
 	const index = rooms[room].webSockets.indexOf(socket);
 	rooms[room].webSockets.splice(index, 1);
+}
+
+function deleteInactiveUsers(room){
+	const activeUserUids = new Set();
+	for (const webSocket of rooms[room].webSockets){
+		if (webSocket.userUid) activeUserUids.add(webSocket.userUid);
+	}
+	const usersToDelete = [];
+	for (const uid in rooms[room].users){
+		if (! activeUserUids.has(uid)) usersToDelete.push(uid);
+	}
+	for (const uid of usersToDelete){
+		delete rooms[room].users[uid];
+	}
 }
