@@ -5,6 +5,7 @@ class Room{
         this.webSockets = [];
         this.users = {};
         this.adminId = null;
+        this.state = "WaitingForDM";
     }
 
     sendMessageToRoom(message){
@@ -38,6 +39,11 @@ class Room{
             dataToSendToClient.push(userData);
         }
         return dataToSendToClient;
+    }
+    
+    setState(data){
+        this.state = data;
+        this.sendMessageToRoom(JSON.stringify({event: "roomState", data}));
     }
 }
 module.exports = Room;

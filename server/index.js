@@ -112,6 +112,8 @@ wss.on("connection", function connection(ws, roomName) {
 			console.log(rooms[roomName].webSockets);
 
 			rooms[roomName].sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: rooms[roomName].getListOfUsers()}));
+		} else if (receivedMessage.event === "roomState"){
+			rooms[roomName].setState(receivedMessage.data);
 		}
 		
 	})
