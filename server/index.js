@@ -103,6 +103,7 @@ wss.on("connection", function connection(ws, roomName) {
 			const characterName = userData.characterName;
 			const initiativeModifier = userData.initiativeModifier;
 			rooms[roomName].users[uid] = {characterName, initiativeModifier}
+			if (! rooms[roomName].adminId) rooms[roomName].adminId = uid;
 			ws.userUid = uid;
 			deleteInactiveUsers(roomName);
 			console.log(rooms);
