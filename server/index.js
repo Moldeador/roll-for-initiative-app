@@ -1,6 +1,7 @@
 const http = require('http');
 const url = require('url');
 const nameGenerator = require('./room-name-generator.js');
+const Room = require('./room.js');
 //Websockets
 const ws =require('ws');
 
@@ -48,7 +49,7 @@ const server = http.createServer(function (req, res) {
 			while (name in rooms){
 				name = nameGenerator.generateName();
 			}
-			rooms[name] = {name, webSockets:[], users: {}};
+			rooms[name] = new Room(name);
 			res.write(name);
 			res.end();
 		}
