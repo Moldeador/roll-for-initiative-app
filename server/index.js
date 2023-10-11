@@ -95,7 +95,7 @@ console.log('Listening on port 3000...');
 
 
 wss.on("connection", function connection(ws, roomName) {
-	sendMessageToRoom("a new player has joined room: " + roomName, roomName);
+	rooms[roomName].sendMessageToRoom("a new player has joined room: " + roomName);
 	ws.on("message", function(msg) {
 		const receivedMessage = JSON.parse(msg.toString());
 		if (receivedMessage.event === "userData"){
@@ -106,51 +106,18 @@ wss.on("connection", function connection(ws, roomName) {
 			rooms[roomName].users[uid] = {characterName, initiativeModifier}
 			if (! rooms[roomName].adminId) rooms[roomName].adminId = uid;
 			ws.userUid = uid;
-			deleteInactiveUsers(roomName);
+			rooms[roomName].deleteInactiveUsers();
 			console.log(rooms);
 			console.log(rooms[roomName].users[uid]);
 			console.log(rooms[roomName].webSockets);
 
-			sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: getListOfUsers(roomName)}), roomName);
+			rooms[roomName].sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: rooms[roomName].getListOfUsers()}));
 		}
 		
 	})
 	ws.on("close", function(){
-		deleteSocketFromRoom(ws, roomName);
-		deleteInactiveUsers(roomName);
-		sendMessageToRoom("a player has left the room: " + roomName, roomName);
+		rooms[roomName].deleteSocketFromRoom(ws);
+		rooms[roomName].deleteInactiveUsers();
+		rooms[roomName].sendMessageToRoom("a player has left the room: " + roomName);
 	})
 });
-
-function sendMessageToRoom(message, room){
-	for (const webSocket of rooms[room].webSockets){
-		webSocket.send(message);
-	}
-}
-
-function deleteSocketFromRoom(socket, room){
-	const index = rooms[room].webSockets.indexOf(socket);
-	rooms[room].webSockets.splice(index, 1);
-}
-
-function deleteInactiveUsers(room){
-	const activeUserUids = new Set();
-	for (const webSocket of rooms[room].webSockets){
-		if (webSocket.userUid) activeUserUids.add(webSocket.userUid);
-	}
-	const usersToDelete = [];
-	for (const uid in rooms[room].users){
-		if (! activeUserUids.has(uid)) usersToDelete.push(uid);
-	}
-	for (const uid of usersToDelete){
-		delete rooms[room].users[uid];
-	}
-}
-
-function getListOfUsers(room){
-	const dataToSendToClient = [];
-	for (const [uid, userData] of Object.entries(rooms[room].users)){
-		dataToSendToClient.push(userData);
-	}
-	return dataToSendToClient;
-}
