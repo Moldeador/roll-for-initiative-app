@@ -43,7 +43,12 @@ class Room{
     
     setState(data){
         this.state = data;
-        this.sendMessageToRoom(JSON.stringify({event: "roomState", data}));
+        this.sendRoomStateToRoom();
+    }
+
+    sendRoomStateToRoom(){
+        this.sendMessageToRoom(JSON.stringify({event: "roomState", data: this.state}));
+
     }
 }
 module.exports = Room;

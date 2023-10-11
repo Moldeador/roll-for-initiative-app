@@ -95,7 +95,7 @@ console.log('Listening on port 3000...');
 
 
 wss.on("connection", function connection(ws, roomName) {
-	rooms[roomName].sendMessageToRoom("a new player has joined room: " + roomName);
+	rooms[roomName].sendRoomStateToRoom();
 	ws.on("message", function(msg) {
 		const receivedMessage = JSON.parse(msg.toString());
 		if (receivedMessage.event === "userData"){
@@ -110,7 +110,6 @@ wss.on("connection", function connection(ws, roomName) {
 			console.log(rooms);
 			console.log(rooms[roomName].users[uid]);
 			console.log(rooms[roomName].webSockets);
-
 			rooms[roomName].sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: rooms[roomName].getListOfUsers()}));
 		} else if (receivedMessage.event === "roomState"){
 			rooms[roomName].setState(receivedMessage.data);
