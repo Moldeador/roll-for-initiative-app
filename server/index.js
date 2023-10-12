@@ -110,7 +110,7 @@ wss.on("connection", function connection(ws, roomName) {
 			console.log(rooms);
 			console.log(rooms[roomName].users[uid]);
 			console.log(rooms[roomName].webSockets);
-			//send a message you are the admin
+			if (rooms[roomName].adminId == uid) ws.send(JSON.stringify({event: "youAreAdmin"}));
 			rooms[roomName].sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: rooms[roomName].getListOfUsers()}));
 		} else if (receivedMessage.event === "roomState"){
 			rooms[roomName].setState(receivedMessage.data);
@@ -120,6 +120,6 @@ wss.on("connection", function connection(ws, roomName) {
 	ws.on("close", function(){
 		rooms[roomName].deleteSocketFromRoom(ws);
 		rooms[roomName].deleteInactiveUsers();
-		rooms[roomName].sendMessageToRoom("a player has left the room: " + roomName);
+		rooms[roomName].sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: rooms[roomName].getListOfUsers()}));
 	})
 });
