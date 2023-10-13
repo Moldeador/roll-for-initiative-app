@@ -5,7 +5,7 @@ class Room{
         this.webSockets = [];
         this.users = {};
         this.adminId = null;
-        this.state = "WaitingForDM";
+        this.state = "waitingForDM";
     }
 
     sendMessageToRoom(message){

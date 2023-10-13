@@ -95,7 +95,7 @@ console.log('Listening on port 3000...');
 
 
 wss.on("connection", function connection(ws, roomName) {
-	rooms[roomName].sendStateToRoom();
+	ws.send(JSON.stringify({event: "roomState", data: rooms[roomName].state}))
 	ws.on("message", function(msg) {
 		const receivedMessage = JSON.parse(msg.toString());
 		if (receivedMessage.event === "userData"){
@@ -113,7 +113,11 @@ wss.on("connection", function connection(ws, roomName) {
 			if (rooms[roomName].adminId == uid) ws.send(JSON.stringify({event: "youAreAdmin"}));
 			rooms[roomName].sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: rooms[roomName].getListOfUsers()}));
 		} else if (receivedMessage.event === "roomState"){
-			rooms[roomName].setState(receivedMessage.data);
+			if (receivedMessage.data === "initiativeRoll"){
+				if (rooms[roomName].adminId == ws.userUid){
+					rooms[roomName].setState("initiativeRoll");
+				}
+			} 
 		}
 		
 	})
