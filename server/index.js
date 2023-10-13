@@ -103,14 +103,14 @@ wss.on("connection", function connection(ws, roomName) {
 			const uid = userData.uid;
 			const characterName = userData.characterName;
 			const initiativeModifier = userData.initiativeModifier;
-			rooms[roomName].users[uid] = {characterName, initiativeModifier}
+			rooms[roomName].users[uid] = {characterName, initiativeModifier, roll: null, turnOrder: null};
 			if (! rooms[roomName].adminId) rooms[roomName].adminId = uid;
 			ws.userUid = uid;
 			rooms[roomName].deleteInactiveUsers();
 			console.log(rooms);
 			console.log(rooms[roomName].users[uid]);
 			console.log(rooms[roomName].webSockets);
-			if (rooms[roomName].adminId == uid) ws.send(JSON.stringify({event: "youAreAdmin"}));
+			if (rooms[roomName].adminId == uid) ws.send(JSON.stringify({event: "youAreAdmin"}));//TODO: return all user data, including roll
 			rooms[roomName].sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: rooms[roomName].getListOfUsers()}));
 		} else if (receivedMessage.event === "roomState"){
 			if (receivedMessage.data === "initiativeRoll"){
@@ -118,6 +118,13 @@ wss.on("connection", function connection(ws, roomName) {
 					rooms[roomName].setState("initiativeRoll");
 				}
 			} 
+		} else if (receivedMessage.event === "roll"){
+			if (rooms[roomName].state === "initiativeRoll" && rooms[roomName].users[ws.userUid].roll===null){
+				let roll = Math.floor(Math.random() * 20 + 1);
+				rooms[roomName].users[ws.userUid].roll = roll;
+				ws.send(JSON.stringify({event: "roll", data: roll}));
+				//rooms[roomName].generatePlayerOrder();
+			}
 		}
 		
 	})
