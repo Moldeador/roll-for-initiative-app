@@ -32,11 +32,19 @@ class Room{
             delete this.users[uid];
         }
     }
-
+ 
     getListOfUsers(){
         const dataToSendToClient = [];
         for (const [uid, userData] of Object.entries(this.users)){
             dataToSendToClient.push(userData);
+        }
+        return dataToSendToClient;
+    }
+
+    getUsersTurnOrder(){
+        const dataToSendToClient = {};
+        for (const [uid, userData] of Object.entries(this.users)){
+            dataToSendToClient[uid] = userData.turnOrder;
         }
         return dataToSendToClient;
     }
@@ -52,7 +60,10 @@ class Room{
     
     sendUsersDataToRoom(){
         this.sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: this.getListOfUsers()}));
-
+    }
+    
+    sendTurnOrderToRoom(){
+        this.sendMessageToRoom(JSON.stringify({event: "turnOrder", data: this.getUsersTurnOrder()}));
     }
 
     generateTurnOrder(){
@@ -70,7 +81,7 @@ class Room{
         console.log(this.users);
         this.state = "turnOrder";
         this.sendStateToRoom();
-        this.sendUsersDataToRoom();
+        this.sendTurnOrderToRoom();
 
 
     }
