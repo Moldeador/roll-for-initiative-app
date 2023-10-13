@@ -49,6 +49,38 @@ class Room{
     sendStateToRoom(){
         this.sendMessageToRoom(JSON.stringify({event: "roomState", data: this.state}));
     }
+    
+    sendUsersDataToRoom(){
+        this.sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: this.getListOfUsers()}));
+
+    }
+
+    generateTurnOrder(){
+        if (! this.allPlayersHaveRolled()) return;
+        let initiativeRolls = [];
+        for (const [uid, user] of Object.entries(this.users)){
+            let initiativeRoll = Number(user.roll) + Number(user.initiativeModifier);
+            initiativeRolls.push([uid, initiativeRoll]);
+        }
+        initiativeRolls.sort((a,b)=>b[1]-a[1]);
+        for (const turnOrder in initiativeRolls){
+            const uid = initiativeRolls[turnOrder][0];
+            this.users[uid]["turnOrder"] = Number(turnOrder) + 1; 
+        }
+        console.log(this.users);
+        this.state = "turnOrder";
+        this.sendStateToRoom();
+        this.sendUsersDataToRoom();
+
+
+    }
+
+    allPlayersHaveRolled(){
+        for (const [uid, user] of Object.entries(this.users)){
+            if (user.roll===null) return false;
+        }
+        return true;
+    }
 
 }
 module.exports = Room;

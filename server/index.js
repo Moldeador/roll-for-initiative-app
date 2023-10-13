@@ -109,7 +109,6 @@ wss.on("connection", function connection(ws, roomName) {
 			rooms[roomName].deleteInactiveUsers();
 			console.log(rooms);
 			console.log(rooms[roomName].users[uid]);
-			console.log(rooms[roomName].webSockets);
 			if (rooms[roomName].adminId == uid) ws.send(JSON.stringify({event: "youAreAdmin"}));//TODO: return all user data, including roll
 			rooms[roomName].sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: rooms[roomName].getListOfUsers()}));
 		} else if (receivedMessage.event === "roomState"){
@@ -123,7 +122,7 @@ wss.on("connection", function connection(ws, roomName) {
 				let roll = Math.floor(Math.random() * 20 + 1);
 				rooms[roomName].users[ws.userUid].roll = roll;
 				ws.send(JSON.stringify({event: "roll", data: roll}));
-				//rooms[roomName].generatePlayerOrder();
+				rooms[roomName].generateTurnOrder();
 			}
 		}
 		
@@ -131,6 +130,6 @@ wss.on("connection", function connection(ws, roomName) {
 	ws.on("close", function(){
 		rooms[roomName].deleteSocketFromRoom(ws);
 		rooms[roomName].deleteInactiveUsers();
-		rooms[roomName].sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: rooms[roomName].getListOfUsers()}));
+		rooms[roomName].sendUsersDataToRoom;
 	})
 });
