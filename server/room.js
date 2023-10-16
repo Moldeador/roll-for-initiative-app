@@ -33,14 +33,6 @@ class Room{
         }
     }
  
-    getUsersTurnOrder(){
-        const dataToSendToClient = {};
-        for (const [uid, userData] of Object.entries(this.users)){
-            dataToSendToClient[uid] = userData.turnOrder;
-        }
-        return dataToSendToClient;
-    }
-    
     setState(data){
         this.state = data;
         this.sendStateToRoom();
@@ -50,10 +42,6 @@ class Room{
         this.sendMessageToRoom(JSON.stringify({event: "roomState", data: this.state}));
     }
     
-    sendTurnOrderToRoom(){
-        this.sendMessageToRoom(JSON.stringify({event: "turnOrder", data: this.getUsersTurnOrder()}));
-    }
-
     sendCharactersDataToRoom(){
         for (const webSocket of this.webSockets){
             const charactersLists = this.getOwnedCharactersAndOthersCharacters(webSocket.userUid);
@@ -86,9 +74,6 @@ class Room{
         console.log(this.users);
         this.state = "turnOrder";
         this.sendStateToRoom();
-        this.sendTurnOrderToRoom();
-
-
     }
 
     allPlayersHaveRolled(){
