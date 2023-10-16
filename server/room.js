@@ -33,14 +33,6 @@ class Room{
         }
     }
  
-    getListOfUsers(){
-        const dataToSendToClient = [];
-        for (const [uid, userData] of Object.entries(this.users)){
-            dataToSendToClient.push(userData);
-        }
-        return dataToSendToClient;
-    }
-
     getUsersTurnOrder(){
         const dataToSendToClient = {};
         for (const [uid, userData] of Object.entries(this.users)){
@@ -58,12 +50,25 @@ class Room{
         this.sendMessageToRoom(JSON.stringify({event: "roomState", data: this.state}));
     }
     
-    sendUsersDataToRoom(){
-        this.sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: this.getListOfUsers()}));
-    }
-    
     sendTurnOrderToRoom(){
         this.sendMessageToRoom(JSON.stringify({event: "turnOrder", data: this.getUsersTurnOrder()}));
+    }
+
+    sendCharactersDataToRoom(){
+        for (const webSocket of this.webSockets){
+            const charactersLists = this.getOwnedCharactersAndOthersCharacters(webSocket.userUid);
+            const message = JSON.stringify({event: "listOfCharacters", data: charactersLists});
+            webSocket.send(message);
+        }
+    }
+
+    getOwnedCharactersAndOthersCharacters(ownUid){
+        const characters = [];
+        for (const [uid, userData] of Object.entries(this.users)){
+            userData["isMe"] = (uid===ownUid) ? true : false;
+            characters.push(userData);
+        }
+        return characters;
     }
 
     generateTurnOrder(){

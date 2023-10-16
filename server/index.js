@@ -2,6 +2,7 @@ const http = require('http');
 const url = require('url');
 const nameGenerator = require('./room-name-generator.js');
 const Room = require('./room.js');
+const Character = require('./character.js');
 //Websockets
 const ws =require('ws');
 
@@ -99,18 +100,24 @@ wss.on("connection", function connection(ws, roomName) {
 	ws.on("message", function(msg) {
 		const receivedMessage = JSON.parse(msg.toString());
 		if (receivedMessage.event === "userData"){
+
 			const userData = receivedMessage.data;
 			const uid = userData.uid;
 			const characterName = userData.characterName;
 			const initiativeModifier = userData.initiativeModifier;
-			rooms[roomName].users[uid] = {characterName, initiativeModifier, roll: null, turnOrder: null};
+			
+			rooms[roomName].users[uid] = new Character(characterName, initiativeModifier);
+			
 			if (! rooms[roomName].adminId) rooms[roomName].adminId = uid;
+			
 			ws.userUid = uid;
+			
 			rooms[roomName].deleteInactiveUsers();
-			console.log(rooms);
-			console.log(rooms[roomName].users[uid]);
+			
 			if (rooms[roomName].adminId == uid) ws.send(JSON.stringify({event: "youAreAdmin"}));//TODO: return all user data, including roll
-			rooms[roomName].sendMessageToRoom(JSON.stringify({event: "listOfUsers", data: rooms[roomName].getListOfUsers()}));
+			
+			rooms[roomName].sendCharactersDataToRoom();
+		
 		} else if (receivedMessage.event === "roomState"){
 			if (receivedMessage.data === "initiativeRoll"){
 				if (rooms[roomName].adminId == ws.userUid){
@@ -130,6 +137,6 @@ wss.on("connection", function connection(ws, roomName) {
 	ws.on("close", function(){
 		rooms[roomName].deleteSocketFromRoom(ws);
 		rooms[roomName].deleteInactiveUsers();
-		rooms[roomName].sendUsersDataToRoom;
+		rooms[roomName].sendCharactersDataToRoom();
 	})
 });
