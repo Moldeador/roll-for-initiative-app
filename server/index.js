@@ -106,7 +106,12 @@ wss.on("connection", function connection(ws, roomName) {
 			const characterName = userData.characterName;
 			const initiativeModifier = userData.initiativeModifier;
 			
-			rooms[roomName].users[uid] = new Character(characterName, initiativeModifier);
+			if (uid in rooms[roomName].users){
+				rooms[roomName].users[uid]["characterName"] = characterName;
+				rooms[roomName].users[uid]["initiativeModifier"] = initiativeModifier;
+			} else {
+				rooms[roomName].users[uid] = new Character(characterName, initiativeModifier);
+			}
 			
 			if (! rooms[roomName].adminId) rooms[roomName].adminId = uid;
 			
@@ -128,8 +133,8 @@ wss.on("connection", function connection(ws, roomName) {
 			if (rooms[roomName].state === "initiativeRoll" && rooms[roomName].users[ws.userUid].roll===null){
 				let roll = Math.floor(Math.random() * 20 + 1);
 				rooms[roomName].users[ws.userUid].roll = roll;
-				ws.send(JSON.stringify({event: "roll", data: roll}));
 				rooms[roomName].generateTurnOrder();
+				rooms[roomName].sendCharactersDataToRoom();
 			}
 		}
 		
