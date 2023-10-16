@@ -103,8 +103,8 @@ wss.on("connection", function connection(ws, roomName) {
 
 			const userData = receivedMessage.data;
 			const uid = userData.uid;
-			const characterName = userData.characterName;
-			const initiativeModifier = userData.initiativeModifier;
+			const characterName = userData.characters[0].characterName;
+			const initiativeModifier = userData.characters[0].initiativeModifier;
 			
 			if (uid in rooms[roomName].users){
 				rooms[roomName].users[uid]["characterName"] = characterName;
