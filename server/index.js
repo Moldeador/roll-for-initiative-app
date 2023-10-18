@@ -122,9 +122,13 @@ wss.on("connection", function connection(ws, roomName) {
 			rooms[roomName].sendCharactersDataToRoom();
 		
 		} else if (receivedMessage.event === "roomState"){
-			if (receivedMessage.data === "initiativeRoll"){
-				if (rooms[roomName].adminId == ws.userUid){
-					rooms[roomName].setState("initiativeRoll");
+			const newState = receivedMessage.data;
+			if (rooms[roomName].adminId == ws.userUid){
+				if (newState === "initiativeRoll"){
+					rooms[roomName].setState(newState);
+				} else if (newState === "waitingForDM"){
+					rooms[roomName].resetRoom();
+					rooms[roomName].setState(newState);
 				}
 			} 
 		} else if (receivedMessage.event === "roll"){

@@ -35,6 +35,7 @@ class Room{
  
     setState(data){
         this.state = data;
+        console.log(`new state: ${this.state}`)
         this.sendStateToRoom();
     }
 
@@ -78,6 +79,7 @@ class Room{
             this.users[uid].characters[index]["turnOrder"] = Number(turnOrder) + 1; 
         }
         this.state = "turnOrder";
+        console.log(`The state now is: ${this.state}`);
         this.sendStateToRoom();
     }
 
@@ -88,6 +90,15 @@ class Room{
             }
         }
         return true;
+    }
+
+    resetRoom(){
+        for (const [uid, user] of Object.entries(this.users)){
+            for (const character of user.characters){
+                character.resetCharacter();
+            }
+        }
+        this.sendCharactersDataToRoom();
     }
 
 }
