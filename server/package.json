@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Gather your party, prepare your monsters and... roll for initiative!",
   "main": "index.js",
-  "scripts": {
-    "test": "jest"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Moldeador/roll-initiative-app.git"
@@ -16,9 +13,6 @@
     "url": "https://github.com/Moldeador/roll-initiative-app/issues"
   },
   "homepage": "https://github.com/Moldeador/roll-initiative-app#readme",
-  "devDependencies": {
-    "jest": "^29.5.0"
-  },
   "dependencies": {
     "ws": "^8.14.2"
   }
