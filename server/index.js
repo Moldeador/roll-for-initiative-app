@@ -3,6 +3,7 @@ const url = require('url');
 const nameGenerator = require('./room-name-generator.js');
 const Room = require('./room.js');
 const Character = require('./character.js');
+const User = require('./user.js');
 //Websockets
 const ws =require('ws');
 
@@ -103,36 +104,36 @@ wss.on("connection", function connection(ws, roomName) {
 
 			const userData = receivedMessage.data;
 			const uid = userData.uid;
-			const characterName = userData.characterName;
-			const initiativeModifier = userData.initiativeModifier;
-			
-			if (uid in rooms[roomName].users){
-				rooms[roomName].users[uid]["characterName"] = characterName;
-				rooms[roomName].users[uid]["initiativeModifier"] = initiativeModifier;
-			} else {
-				rooms[roomName].users[uid] = new Character(characterName, initiativeModifier);
-			}
-			
+
 			if (! rooms[roomName].adminId) rooms[roomName].adminId = uid;
-			
 			ws.userUid = uid;
-			
 			rooms[roomName].deleteInactiveUsers();
-			
 			if (rooms[roomName].adminId == uid) ws.send(JSON.stringify({event: "youAreAdmin"}));//TODO: return all user data, including roll
+
+			const charactersData = userData.characters;
+
+			if (uid in rooms[roomName].users){
+				rooms[roomName].users[uid].updateCharacters(charactersData);
+			} else {
+				rooms[roomName].users[uid] = new User(charactersData);
+			}
+			console.log(rooms[roomName].users[uid]);
 			
 			rooms[roomName].sendCharactersDataToRoom();
 		
 		} else if (receivedMessage.event === "roomState"){
-			if (receivedMessage.data === "initiativeRoll"){
-				if (rooms[roomName].adminId == ws.userUid){
-					rooms[roomName].setState("initiativeRoll");
+			const newState = receivedMessage.data;
+			if (rooms[roomName].adminId == ws.userUid){
+				if (newState === "initiativeRoll"){
+					rooms[roomName].setState(newState);
+				} else if (newState === "waitingForDM"){
+					rooms[roomName].resetRoom();
+					rooms[roomName].setState(newState);
 				}
 			} 
 		} else if (receivedMessage.event === "roll"){
-			if (rooms[roomName].state === "initiativeRoll" && rooms[roomName].users[ws.userUid].roll===null){
-				let roll = Math.floor(Math.random() * 20 + 1);
-				rooms[roomName].users[ws.userUid].roll = roll;
+			if (rooms[roomName].state === "initiativeRoll"){
+				rooms[roomName].users[ws.userUid].roll();
 				rooms[roomName].generateTurnOrder();
 				rooms[roomName].sendCharactersDataToRoom();
 			}
